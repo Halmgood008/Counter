@@ -3,11 +3,15 @@ import UIKit
 final class MovieQuizViewController: UIViewController {
     
     // MARK: - IBOutlets
-    @IBOutlet private weak var imageView: UIImageView!
-    @IBOutlet private weak var textLabel: UILabel!
-    @IBOutlet private weak var counterLabel: UILabel!
-    @IBOutlet private weak var yesButton: UIButton!
-    @IBOutlet private weak var noButton: UIButton!
+    @IBOutlet private weak var imageView: UIImageView?
+    @IBOutlet private weak var textLabel: UILabel?
+    @IBOutlet private weak var counterLabel: UILabel?
+    @IBOutlet private weak var yesButton: UIButton?
+    @IBOutlet private weak var noButton: UIButton?
+    
+    // MARK: - Constants
+    private let alertTitle = "Этот раунд окончен!"
+    private let alertButtonText = "Сыграть ещё раз"
     
     // MARK: - Properties
     struct QuizQuestion {
@@ -36,11 +40,14 @@ final class MovieQuizViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-       
-        imageView.layer.cornerRadius = 20
-        imageView.layer.masksToBounds = true
-        
+        configureImage()
         showCurrentQuestion()
+    }
+    
+    // MARK: - Setup
+    private func configureImage() {
+        imageView?.layer.cornerRadius = 20
+        imageView?.layer.masksToBounds = true
     }
     
     // MARK: - Actions
@@ -60,32 +67,32 @@ final class MovieQuizViewController: UIViewController {
         }
         
         let question = questions[currentQuestionIndex]
-        imageView.image = UIImage(named: question.image)
-        textLabel.text = question.text
-        counterLabel.text = "\(currentQuestionIndex + 1)/\(questions.count)"
+        imageView?.image = UIImage(named: question.image)
+        textLabel?.text = question.text
+        counterLabel?.text = "\(currentQuestionIndex + 1)/\(questions.count)"
         
-        yesButton.isEnabled = true
-        noButton.isEnabled = true
+        yesButton?.isEnabled = true
+        noButton?.isEnabled = true
     }
     
     private func checkAnswer(userAnswer: Bool) {
-        yesButton.isEnabled = false
-        noButton.isEnabled = false
+        yesButton?.isEnabled = false
+        noButton?.isEnabled = false
         
         let correctAnswer = questions[currentQuestionIndex].correctAnswer
         let isCorrect = (userAnswer == correctAnswer)
         
-        imageView.layer.borderWidth = 8
-        imageView.layer.borderColor = isCorrect ? UIColor.systemGreen.cgColor : UIColor.systemRed.cgColor
+        imageView?.layer.borderWidth = 8
+        imageView?.layer.borderColor = isCorrect ? UIColor.systemGreen.cgColor : UIColor.systemRed.cgColor
         
         if isCorrect {
             correctAnswers += 1
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             
-            self.imageView.layer.borderWidth = 0
+            self.imageView?.layer.borderWidth = 0
             self.currentQuestionIndex += 1
             self.showCurrentQuestion()
         }
@@ -93,12 +100,12 @@ final class MovieQuizViewController: UIViewController {
     
     private func showFinalResults() {
         let alert = UIAlertController(
-            title: "Этот раунд окончен!",
+            title: alertTitle,
             message: "Ваш результат: \(correctAnswers)/\(questions.count)",
             preferredStyle: .alert
         )
         
-        let action = UIAlertAction(title: "Сыграть ещё раз", style: .default) { [weak self] _ in
+        let action = UIAlertAction(title: alertButtonText, style: .default) { [weak self] _ in
             self?.currentQuestionIndex = 0
             self?.correctAnswers = 0
             self?.showCurrentQuestion()
