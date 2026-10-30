@@ -83,7 +83,8 @@ final class MovieQuizViewController: UIViewController {
         let isCorrect = (userAnswer == correctAnswer)
         
         imageView?.layer.borderWidth = 8
-        imageView?.layer.borderColor = isCorrect ? UIColor.systemGreen.cgColor : UIColor.systemRed.cgColor
+        let borderColor = isCorrect ? UIColor(named: "YP Green") : UIColor(named: "YP Red")
+        imageView?.layer.borderColor = borderColor?.cgColor
         
         if isCorrect {
             correctAnswers += 1
