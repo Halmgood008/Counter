@@ -12,30 +12,15 @@ final class MovieQuizViewController: UIViewController {
     // MARK: - Constants
     private let alertTitle = "Этот раунд окончен!"
     private let alertButtonText = "Сыграть ещё раз"
+    private let totalQuestions = 10
     
-    // MARK: - Properties
-    struct QuizQuestion {
-        let image: String
-        let text: String
-        let correctAnswer: Bool
-    }
-    
-    private let questions: [QuizQuestion] = [
-        QuizQuestion(image: "The Godfather", text: "Рейтинг этого фильма больше чем 6?", correctAnswer: true),
-        QuizQuestion(image: "The Dark Knight", text: "Рейтинг этого фильма больше чем 6?", correctAnswer: true),
-        QuizQuestion(image: "Kill Bill", text: "Рейтинг этого фильма больше чем 6?", correctAnswer: true),
-        QuizQuestion(image: "The Avengers", text: "Рейтинг этого фильма больше чем 6?", correctAnswer: true),
-        QuizQuestion(image: "Deadpool", text: "Рейтинг этого фильма больше чем 6?", correctAnswer: true),
-        QuizQuestion(image: "The Green Knight", text: "Рейтинг этого фильма больше чем 6?", correctAnswer: true),
-        QuizQuestion(image: "Old", text: "Рейтинг этого фильма больше чем 6?", correctAnswer: false),
-        QuizQuestion(image: "The Ice Age Adventures of Buck Wild", text: "Рейтинг этого фильма больше чем 6?", correctAnswer: false),
-        QuizQuestion(image: "Tesla", text: "Рейтинг этого фильма больше чем 6?", correctAnswer: false),
-        QuizQuestion(image: "Vivarium", text: "Рейтинг этого фильма больше чем 6?", correctAnswer: false)
-    ]
-    
-    private var currentQuestionIndex = 0
+    // Сервисы
+    private let statisticService: StatisticServiceProtocol = StatisticService()
+    private let alertPresenter = ResultAlertPresenter()
+    private let questionFactory: QuestionFactoryProtocol = QuestionFactory()
+
     private var correctAnswers = 0
-    
+    private var currentQuestion: QuizQuestion?
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -61,16 +46,17 @@ final class MovieQuizViewController: UIViewController {
     
     // MARK: - Logic
     private func showCurrentQuestion() {
-        guard currentQuestionIndex < questions.count else {
+        guard let question = questionFactory.requestQuestion() else {
             showFinalResults()
             return
         }
         
-        let question = questions[currentQuestionIndex]
+        self.currentQuestion = question
+        
         imageView?.image = UIImage(named: question.image)
         textLabel?.text = question.text
-        counterLabel?.text = "\(currentQuestionIndex + 1)/\(questions.count)"
-        
+        counterLabel?.text = "\(questionFactory.currentIndex)/\(totalQuestions)"
+                
         yesButton?.isEnabled = true
         noButton?.isEnabled = true
     }
@@ -79,8 +65,8 @@ final class MovieQuizViewController: UIViewController {
         yesButton?.isEnabled = false
         noButton?.isEnabled = false
         
-        let correctAnswer = questions[currentQuestionIndex].correctAnswer
-        let isCorrect = (userAnswer == correctAnswer)
+        guard let currentQuestion = currentQuestion else { return }
+        let isCorrect = (userAnswer == currentQuestion.correctAnswer)
         
         imageView?.layer.borderWidth = 8
         let borderColor = isCorrect ? UIColor(named: "YP Green") : UIColor(named: "YP Red")
@@ -89,30 +75,38 @@ final class MovieQuizViewController: UIViewController {
         if isCorrect {
             correctAnswers += 1
         }
-        
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self else { return }
-            
             self.imageView?.layer.borderWidth = 0
-            self.currentQuestionIndex += 1
             self.showCurrentQuestion()
         }
     }
     
     private func showFinalResults() {
-        let alert = UIAlertController(
+        statisticService.saveResult(correct: correctAnswers, total: totalQuestions)
+                
+        let bestGame = statisticService.bestGame
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd.MM.yy HH:mm"
+        let dateString = dateFormatter.string(from: bestGame.date)
+                
+        let message = """
+        Ваш результат: \(correctAnswers)/\(totalQuestions)
+        Количество сыгранных квизов: \(statisticService.gamesCount)
+        Рекорд: \(bestGame.correct)/\(bestGame.total) (\(dateString))
+        Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
+        """
+                
+        let model = AlertModel(
             title: alertTitle,
-            message: "Ваш результат: \(correctAnswers)/\(questions.count)",
-            preferredStyle: .alert
+            message: message,
+            buttonText: alertButtonText
         )
-        
-        let action = UIAlertAction(title: alertButtonText, style: .default) { [weak self] _ in
-            self?.currentQuestionIndex = 0
+                
+        alertPresenter.showAlert(on: self, with: model) { [weak self] in
             self?.correctAnswers = 0
+            self?.questionFactory.reset()
             self?.showCurrentQuestion()
         }
-        
-        alert.addAction(action)
-        present(alert, animated: true)
     }
 }
