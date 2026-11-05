@@ -1,10 +1,5 @@
 import UIKit
 
-struct AlertModel {
-    let title: String
-    let message: String
-    let buttonText: String
-}
 
 final class ResultAlertPresenter {
     private var actionHandler: (() -> Void)?

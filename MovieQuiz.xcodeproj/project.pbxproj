@@ -23,6 +23,7 @@
 		B8A4CE7C309C63D70001855C /* ResultAlertPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A4CE7B309C63D30001855C /* ResultAlertPresenter.swift */; };
 		B8A4CE7E309C6B5D0001855C /* QuestionFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A4CE7D309C6B5B0001855C /* QuestionFactory.swift */; };
 		B8A4CE80309C725A0001855C /* QuizQuestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A4CE7F309C725A0001855C /* QuizQuestion.swift */; };
+		B8A4CE82309CAA1D0001855C /* AlertModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A4CE81309CAA1B0001855C /* AlertModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +45,7 @@
 		B8A4CE7B309C63D30001855C /* ResultAlertPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultAlertPresenter.swift; sourceTree = "<group>"; };
 		B8A4CE7D309C6B5B0001855C /* QuestionFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionFactory.swift; sourceTree = "<group>"; };
 		B8A4CE7F309C725A0001855C /* QuizQuestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizQuestion.swift; sourceTree = "<group>"; };
+		B8A4CE81309CAA1B0001855C /* AlertModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +62,7 @@
 		611342392B701CF6003FC2A4 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				B8A4CE81309CAA1B0001855C /* AlertModel.swift */,
 				B8A4CE7F309C725A0001855C /* QuizQuestion.swift */,
 				B8A4CE77309C5E020001855C /* GameResult.swift */,
 			);
@@ -215,6 +218,7 @@
 				AD7AFA552836189F00399704 /* Array+Extensions.swift in Sources */,
 				B8A4CE7A309C5E2A0001855C /* StatistiсService.swift in Sources */,
 				B8A4CE80309C725A0001855C /* QuizQuestion.swift in Sources */,
+				B8A4CE82309CAA1D0001855C /* AlertModel.swift in Sources */,
 				AD1ABAB62831907B00B3E448 /* MovieQuizViewController.swift in Sources */,
 				B8A4CE78309C5E140001855C /* GameResult.swift in Sources */,
 				B8A4CE7C309C63D70001855C /* ResultAlertPresenter.swift in Sources */,
