@@ -16,6 +16,20 @@ final class StatisticService: StatisticServiceProtocol {
     
     private let userDefaults = UserDefaults.standard
     
+    // MARK: - Вычисляемые свойства (по рекомендации ревьюера)
+       
+    private var correct: Int {
+        get { userDefaults.integer(forKey: Keys.correct.rawValue) }
+        set { userDefaults.set(newValue, forKey: Keys.correct.rawValue) }
+    }
+       
+    private var total: Int {
+        get { userDefaults.integer(forKey: Keys.total.rawValue) }
+        set { userDefaults.set(newValue, forKey: Keys.total.rawValue) }
+    }
+    
+    // MARK: - Свойства протокола
+    
     var gamesCount: Int {
         get { userDefaults.integer(forKey: Keys.gamesCount.rawValue) }
         set { userDefaults.set(newValue, forKey: Keys.gamesCount.rawValue) }
@@ -36,17 +50,15 @@ final class StatisticService: StatisticServiceProtocol {
     }
                 
     var totalAccuracy: Double {
-        let totalCorrect = userDefaults.integer(forKey: Keys.correct.rawValue)
-        let totalQuestions = userDefaults.integer(forKey: Keys.total.rawValue)
-        guard totalQuestions > 0 else { return 0 }
-        return (Double(totalCorrect) / Double(totalQuestions)) * 100
+        guard total > 0 else { return 0 }
+        return (Double(correct) / Double(total)) * 100
     }
+    
+    // MARK: - Methods
                 
     func saveResult(correct count: Int, total amount: Int) {
-        let currentCorrect = userDefaults.integer(forKey: Keys.correct.rawValue)
-        let currentTotal = userDefaults.integer(forKey: Keys.total.rawValue)
-        userDefaults.set(currentCorrect + count, forKey: Keys.correct.rawValue)
-        userDefaults.set(currentTotal + amount, forKey: Keys.total.rawValue)
+        self.correct += count
+        self.total += amount
         
         gamesCount += 1
         
