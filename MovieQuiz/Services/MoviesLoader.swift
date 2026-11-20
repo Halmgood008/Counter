@@ -7,7 +7,11 @@ enum NetworkError: Error {
     case serverError(statusCode: Int)
 }
 
-final class MoviesLoader {
+protocol MoviesLoaderProtocol {
+    func loadMovies(handler: @escaping (Result<[Movie], Error>) -> Void)
+}
+
+final class MoviesLoader: MoviesLoaderProtocol {
     private let apiKey = "juv0ohccyeycmvbwn4du"
     
     func loadMovies(handler: @escaping (Result<[Movie], Error>) -> Void) {
@@ -44,7 +48,6 @@ final class MoviesLoader {
                     handler(.success(response.items))
                 }
             } catch {
-                print("Ошибка парсинга: \(error)")
                 DispatchQueue.main.async {
                     handler(.failure(NetworkError.decodeError))
                 }

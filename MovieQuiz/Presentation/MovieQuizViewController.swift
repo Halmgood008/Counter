@@ -8,6 +8,7 @@ final class MovieQuizViewController: UIViewController {
     @IBOutlet private weak var counterLabel: UILabel!
     @IBOutlet private weak var yesButton: UIButton!
     @IBOutlet private weak var noButton: UIButton!
+    
     private let activityIndicator = UIActivityIndicatorView(style: .large)
     
     // MARK: - Constants
@@ -18,8 +19,9 @@ final class MovieQuizViewController: UIViewController {
     // MARK: - Services
     private let statisticService: StatisticServiceProtocol = StatisticService()
     private let alertPresenter = ResultAlertPresenter()
-    private let moviesLoader = MoviesLoader()
-    private let imageLoader = ImageLoader()
+    
+    private let moviesLoader: MoviesLoaderProtocol = MoviesLoader()
+    private let imageLoader: ImageLoaderProtocol = ImageLoader()
     
     private lazy var questionFactory: QuestionFactoryProtocol = {
         QuestionFactory(moviesLoader: moviesLoader)
@@ -33,16 +35,17 @@ final class MovieQuizViewController: UIViewController {
         super.viewDidLoad()
         configureImage()
         setupActivityIndicator()
+        showLoadingIndicator()
         loadData()
     }
     
     private func setupActivityIndicator() {
         activityIndicator.color = .gray
         activityIndicator.hidesWhenStopped = true
-            
+        
         view.addSubview(activityIndicator)
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
-            
+        
         NSLayoutConstraint.activate([
             activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
@@ -55,6 +58,13 @@ final class MovieQuizViewController: UIViewController {
         imageView?.layer.masksToBounds = true
     }
     
+    // MARK: - Loading Indicator
+    private func showLoadingIndicator() {
+        activityIndicator.startAnimating()
+        yesButton?.isEnabled = false
+        noButton?.isEnabled = false
+    }
+    
     // MARK: - Actions
     @IBAction private func yesButtonTapped(_ sender: UIButton) {
         checkAnswer(userAnswer: true)
@@ -65,21 +75,15 @@ final class MovieQuizViewController: UIViewController {
     }
     
     // MARK: - Logic
-    
     private func loadData() {
-        activityIndicator.startAnimating()
-        yesButton?.isEnabled = false
-        noButton?.isEnabled = false
-        
         questionFactory.loadData { [weak self] result in
             guard let self = self else { return }
-            
-            self.activityIndicator.stopAnimating()
             
             switch result {
             case .success:
                 self.showCurrentQuestion()
             case .failure:
+                self.activityIndicator.stopAnimating()
                 self.showNetworkErrorAlert()
             }
         }
@@ -92,6 +96,7 @@ final class MovieQuizViewController: UIViewController {
             buttonText: "Попробовать ещё раз"
         )
         alertPresenter.showAlert(on: self, with: model) { [weak self] in
+            self?.showLoadingIndicator()
             self?.loadData()
         }
     }
@@ -104,23 +109,23 @@ final class MovieQuizViewController: UIViewController {
         
         self.currentQuestion = question
         
+        showLoadingIndicator()
+        
         imageView?.alpha = 0.0
         imageView?.image = nil
         
         textLabel?.text = question.text
         counterLabel?.text = "\(questionFactory.currentIndex)/\(totalQuestions)"
         
-        yesButton?.isEnabled = true
-        noButton?.isEnabled = true
-        
         imageLoader.loadImage(urlString: question.image) { [weak self] image in
             guard let self = self else { return }
+            
             self.imageView?.alpha = 1.0
-            if let image = image {
-                self.imageView?.image = image
-            } else {
-                self.imageView?.image = UIImage(systemName: "photo")
-            }
+            self.imageView?.image = image ?? UIImage(systemName: "photo")
+
+            self.activityIndicator.stopAnimating()
+            self.yesButton?.isEnabled = true
+            self.noButton?.isEnabled = true
         }
     }
     

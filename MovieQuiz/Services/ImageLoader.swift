@@ -1,6 +1,10 @@
 import UIKit
 
-final class ImageLoader {
+protocol ImageLoaderProtocol {
+    func loadImage(urlString: String, completion: @escaping (UIImage?) -> Void)
+}
+
+final class ImageLoader: ImageLoaderProtocol {
     private let imageCache = NSCache<NSString, UIImage>()
     
     func loadImage(urlString: String, completion: @escaping (UIImage?) -> Void) {

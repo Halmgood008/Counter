@@ -8,11 +8,11 @@ protocol QuestionFactoryProtocol {
 }
 
 final class QuestionFactory: QuestionFactoryProtocol {
-    private let moviesLoader: MoviesLoader
+    private let moviesLoader: MoviesLoaderProtocol
     private var movies: [Movie] = []
     private(set) var currentIndex = 0
     
-    init(moviesLoader: MoviesLoader) {
+    init(moviesLoader: MoviesLoaderProtocol) {
         self.moviesLoader = moviesLoader
     }
     
@@ -34,11 +34,26 @@ final class QuestionFactory: QuestionFactoryProtocol {
         guard currentIndex < 10, currentIndex < movies.count else { return nil }
         
         let movie = movies[currentIndex]
-        let ratingThreshold = 6.0
+        
+        let randomThreshold = Double.random(in: 5.0...9.0)
+        let roundedThreshold = (randomThreshold * 10).rounded() / 10
+        let isGreater = Bool.random()
+        
+        let questionText: String
+        let correctAnswer: Bool
+        
+        if isGreater {
+            questionText = "Рейтинг этого фильма больше чем \(roundedThreshold)?"
+            correctAnswer = movie.rating > roundedThreshold
+        } else {
+            questionText = "Рейтинг этого фильма меньше чем \(roundedThreshold)?"
+            correctAnswer = movie.rating < roundedThreshold
+        }
+        
         let question = QuizQuestion(
             image: movie.imageURL,
-            text: "Рейтинг этого фильма больше чем \(Int(ratingThreshold))?",
-            correctAnswer: movie.rating > ratingThreshold
+            text: questionText,
+            correctAnswer: correctAnswer
         )
         
         currentIndex += 1
