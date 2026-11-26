@@ -1,7 +1,7 @@
 import XCTest
 @testable import MovieQuiz
 
-class MoviesLoaderTests: XCTestCase {
+final class MoviesLoaderTests: XCTestCase {
     
     class MockURLSessionDataTask: URLSessionDataTask, @unchecked Sendable {
         override func resume() {}
@@ -16,7 +16,8 @@ class MoviesLoaderTests: XCTestCase {
         }
     }
     
-    func testSuccessLoading() throws {
+    func testSuccessLoading() {
+        // Given
         let json = """
         {
             "items": [
@@ -32,17 +33,17 @@ class MoviesLoaderTests: XCTestCase {
         let session = MockURLSession()
         session.testData = json
         let loader = MoviesLoader(session: session)
-        
         let expectation = self.expectation(description: "Загрузка фильмов")
         var result: Result<[Movie], Error>?
         
+        // When
         loader.loadMovies { res in
             result = res
             expectation.fulfill()
         }
-        
         waitForExpectations(timeout: 2.0)
         
+        // Then
         switch result {
         case .success(let movies):
             XCTAssertEqual(movies.count, 1)
@@ -53,21 +54,22 @@ class MoviesLoaderTests: XCTestCase {
         }
     }
     
-    func testErrorLoading() throws {
+    func testErrorLoading() {
+        // Given
         let session = MockURLSession()
         session.testData = "invalid json".data(using: .utf8)!
         let loader = MoviesLoader(session: session)
-        
         let expectation = self.expectation(description: "Загрузка с ошибкой")
         var result: Result<[Movie], Error>?
         
+        // When
         loader.loadMovies { res in
             result = res
             expectation.fulfill()
         }
-        
         waitForExpectations(timeout: 2.0)
         
+        // Then
         switch result {
         case .failure(let error):
             XCTAssertNotNil(error)
