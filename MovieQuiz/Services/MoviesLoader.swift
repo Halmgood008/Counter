@@ -11,8 +11,19 @@ protocol MoviesLoaderProtocol {
     func loadMovies(handler: @escaping (Result<[Movie], Error>) -> Void)
 }
 
+protocol URLSessionProtocol {
+    func dataTask(with request: URLRequest, completionHandler: @escaping @Sendable (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTask
+}
+
+extension URLSession: URLSessionProtocol {}
+
 final class MoviesLoader: MoviesLoaderProtocol {
     private let apiKey = "juv0ohccyeycmvbwn4du"
+    private let session: URLSessionProtocol
+    
+    init(session: URLSessionProtocol = URLSession.shared) {
+        self.session = session
+    }
     
     func loadMovies(handler: @escaping (Result<[Movie], Error>) -> Void) {
         guard let url = URL(string: "https://tv-api.com/api/top-250-movies?apikey=\(apiKey)") else {
@@ -22,7 +33,7 @@ final class MoviesLoader: MoviesLoaderProtocol {
         
         let request = URLRequest(url: url)
         
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        session.dataTask(with: request) { data, response, error in
             if let error = error {
                 handler(.failure(error))
                 return
